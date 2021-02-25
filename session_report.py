@@ -9,8 +9,11 @@ import pickle
 
 def runJob(file):
 
-    with open(file) as html_file:
-        soup = BeautifulSoup(html_file, 'lxml')
+    try:
+        with open(file) as html_file:
+            soup = BeautifulSoup(html_file, 'lxml')
+    except Exception as e:
+        print(e)
 
     find_table = soup.find_all('table')
     rows = find_table[0].find_all('tr')
@@ -38,7 +41,7 @@ def runJob(file):
     new_table.columns = ['Name', 'Status', 'Start Time', 'End Time', 'Size', 'Read', 'Transferred', 'Duration', 'Details']
 
     # Filter out the everything apart without Success or Error
-    new_table = new_table[(new_table['Status'].str.contains('Success')) | (new_table['Status'].str.contains('Error'))]
+    new_table = new_table[(new_table['Status'].str.contains('Success')) | (new_table['Status'].str.contains('Error')) | (new_table['Status'].str.contains('Warning'))]
 
     # drop the nan 
     new_table = new_table.dropna()
@@ -67,7 +70,7 @@ def runJob(file):
 
     new_table = new_table.drop(['Size Metric', 'Read Metric', 'Transfer Metric'], axis=1)
 
-    mutli = int(len(new_table) / len(sessionInfo))
+    mutli = int(new_table.shape[0] / len(sessionInfo))
 
     new_list = []
 
@@ -76,8 +79,8 @@ def runJob(file):
             new_list.append(item)
 
     new_table['Date'] = new_list
-    
-    global_df = pd.read_pickle('./data.pkl')
+
+    global_df = pd.read_pickle('./data.pkl')    
 
     frames = [global_df, new_table]
 
@@ -100,7 +103,8 @@ if __name__ == '__main__':
     for filename in os.listdir(directory):
         if filename.endswith(".html"):
             try:
-                runJob(filename)
+                path = directory + '/' + filename
+                runJob(path)
             except:
                 print(f"file {filename} did not work")
 
