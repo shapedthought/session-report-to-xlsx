@@ -24,4 +24,4 @@ Note that the program will create a small .pkl file while running which is used 
 be deleted automatically after the final run.
 
 Note the program assumes that each run has the same quantity of hosts per-report, per-session. If there are more/less in one or more then
-program may skip that report or the 'name' column maybe skewed.
+program may skip that report or the 'Date' column maybe skewed.
