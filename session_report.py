@@ -15,14 +15,28 @@ def runJob(file):
     except Exception as e:
         print(e)
 
-    find_table = soup.find_all('table')
-    rows = find_table[0].find_all('tr')
+    try:
+        find_table = soup.find_all('table')
+        rows = find_table[0].find_all('tr')
+    except Exception as e:
+        print(e)
 
     results = []
 
     sessionInfo = []
 
     session = find_table[0].find_all(class_='sessionDetails')
+
+    job_description = find_table[0].find_all(class_="jobDescription")
+
+    job_numbers = []
+
+    # grabs the quantity of VMs in each session
+    for item in job_description:
+        if len(item) > 0:
+            if len(item.text.split()[2]) <= 2:
+                job_numbers.append(int(item.text.split()[2]))
+
 
     for item in session:
         sessionInfo.append(item.span.text)
@@ -32,11 +46,11 @@ def runJob(file):
         data = [j.text.strip() for j in table_data]
         results.append(data)
 
+
     new_table = pd.DataFrame(results)
 
     # Strip back to just the required columns
     new_table = new_table.iloc[:,0:9]
-
     # Name the columns
     new_table.columns = ['Name', 'Status', 'Start Time', 'End Time', 'Size', 'Read', 'Transferred', 'Duration', 'Details']
 
@@ -70,13 +84,28 @@ def runJob(file):
 
     new_table = new_table.drop(['Size Metric', 'Read Metric', 'Transfer Metric'], axis=1)
 
-    mutli = int(new_table.shape[0] / len(sessionInfo))
+    # mutli = int(new_table.shape[0] / len(sessionInfo))
 
     new_list = []
+    
+    # use the new list of numbers to create a list of the session info with the correct amount
+    # of enteries 
+    # for item in sessionInfo:
+    #     for _ in range(mutli):
+    #         new_list.append(item)
 
-    for item in sessionInfo:
-        for _ in range(mutli):
-            new_list.append(item)
+    index = 0
+    
+    # for each item in the job numbers list
+    for item in job_numbers:
+        # range over the numbers
+        for _ in range(item):
+            # Append the quantity of the names to the new list
+            new_list.append(sessionInfo[index])
+        # Interate the index
+        index += 1
+
+    # print(f"{file}, shape: {new_table.shape[0]}, New List Count: {len(new_list)}")
 
     new_table['Date'] = new_list
 
@@ -107,6 +136,9 @@ if __name__ == '__main__':
                 runJob(path)
             except:
                 print(f"file {filename} did not work")
+                with open("error_files.txt", "a") as error_files:
+                    now_time = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+                    error_files.write(f"{now_time}: {filename}\n")
 
     global_df2 = pd.read_pickle('./data.pkl')
 
