@@ -84,16 +84,8 @@ def runJob(file):
 
     new_table = new_table.drop(['Size Metric', 'Read Metric', 'Transfer Metric'], axis=1)
 
-    # mutli = int(new_table.shape[0] / len(sessionInfo))
-
     new_list = []
     
-    # use the new list of numbers to create a list of the session info with the correct amount
-    # of enteries 
-    # for item in sessionInfo:
-    #     for _ in range(mutli):
-    #         new_list.append(item)
-
     index = 0
     
     # for each item in the job numbers list
@@ -108,6 +100,7 @@ def runJob(file):
     # print(f"{file}, shape: {new_table.shape[0]}, New List Count: {len(new_list)}")
 
     new_table['Date'] = new_list
+    new_table['Date'] = pd.to_datetime(new_table['Date'])
 
     global_df = pd.read_pickle('./data.pkl')    
 
@@ -133,6 +126,7 @@ if __name__ == '__main__':
         if filename.endswith(".html"):
             try:
                 path = directory + '/' + filename
+                print(f"Processing {filename}")
                 runJob(path)
             except:
                 print(f"file {filename} did not work")
