@@ -22,7 +22,7 @@ Select the folder with the reports then press 'ok'.
 
 Note that the program will create a small .pkl file while running which is used to hold the data between each execution. It will be deleted automatically after the final run.
 
-Note if a report fails it is probably a problem with the '1 of 1 hosts processed' field. The tools uses the second number (of x) number to multiple the date field and add it back to the dataframe. If that is incorrect the new column is the wrong length so the operation fails.
+Note if a report fails it is probably a problem with the '1 of 1 hosts processed' field. The tools uses the second number (of x) number to multiply the date field and add it back to the dataframe. If that is incorrect the new column is the wrong length so the operation fails.
 
 ![report](/report.png)
 
