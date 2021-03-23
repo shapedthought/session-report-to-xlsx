@@ -20,8 +20,11 @@ A pop up dialogue box will appear when run with:
 
 Select the folder with the reports then press 'ok'.
 
-Note that the program will create a small .pkl file while running which is used to hold the data between each execution. It will
-be deleted automatically after the final run.
+Note that the program will create a small .pkl file while running which is used to hold the data between each execution. It will be deleted automatically after the final run.
 
-Note the program assumes that each run has the same quantity of hosts per-report, per-session. If there are more/less in one or more then
-program may skip that report or the 'Date' column maybe skewed.
+Note if a report fails it is probably a problem with the '1 of 1 hosts processed' field. The tools uses the second number (of x) number to multiple the date field and add it back to the dataframe. If that is incorrect the new column is the wrong length so the operation fails.
+
+![report](/report.png)
+
+You'll need to look through the failing reports and check if the quantity of VMs on that day matches the second number. You'll then need to manually edit the HTML of the second number which is relatively easy. The HTML class tag that is used for that field is "jobDescription".
+
