@@ -25,6 +25,8 @@ def runJob(file):
 
     session = find_table[0].find_all(class_='sessionDetails')
 
+    session_info = [x.span.text for x in session]
+
     job_description = find_table[0].find_all(class_="jobDescription")
 
     for i in rows:
@@ -46,10 +48,16 @@ def runJob(file):
     # drop the nan 
     new_table = new_table.dropna()
 
+    new_table['Date'] = session_info
+
     # a bunch of splits
     new_table[['Size', 'Size Metric']] = new_table['Size'].str.split(expand=True)
     new_table[['Read', 'Read Metric']] = new_table['Read'].str.split(expand=True)
     new_table[['Transferred', 'Transfer Metric']] = new_table['Transferred'].str.split(expand=True)
+    # Stripping the whitespace from the metric
+    new_table['Size Metric'] = new_table['Size Metric'].str.strip()
+    new_table['Read Metric'] = new_table['Read Metric'].str.strip()
+    new_table['Transfer Metric'] = new_table['Transfer Metric'].str.strip()
     new_table['Name'] = new_table['Name'].str.split(expand=True)[0]
     new_table['End Time'] = new_table['End Time'].str.split(expand=True)[0]
     new_table['Start Time'] = new_table['Start Time'].str.split(expand=True)[0] # just in case
@@ -58,11 +66,12 @@ def runJob(file):
     new_table['Size'] = new_table['Size'].astype(float)
     new_table['Read'] = new_table['Read'].astype(float)
     new_table['Transferred'] = new_table['Transferred'].astype(float)
-    new_table['Start Time'] = pd.to_datetime(new_table['Start Time'])
-    new_table['End Time'] = pd.to_datetime(new_table['End Time'])
+    # new_table['Start Time'] = pd.to_datetime(new_table['Start Time'], format="%H:%M:%S")
+    # new_table['End Time'] = pd.to_datetime(new_table['End Time'], format="%H:%M:%S")
 
     # update the capacities to GB
-    new_table['Size'] = np.where(new_table['Size Metric'] == 'TB', new_table['Size'] * 1024, new_table['Size']) # assumes source will only be TB or GB
+    new_table['Size'] = np.where(new_table['Size Metric'] == 'TB', new_table['Size'] * 1024, new_table['Size']) 
+    new_table['Size'] = np.where(new_table['Size Metric'] == 'MB', new_table['Size'] / 1024, new_table['Size']) 
     new_table['Read'] = np.where(new_table['Read Metric'] == 'TB', new_table['Read'] * 1024, new_table['Read'])
     new_table['Read'] = np.where(new_table['Read Metric'] == 'MB', new_table['Read'] / 1024, new_table['Read']) # just in case
     new_table['Transferred'] = np.where(new_table['Transfer Metric'] == 'MB', new_table['Transferred'] / 1024, new_table['Transferred'])
